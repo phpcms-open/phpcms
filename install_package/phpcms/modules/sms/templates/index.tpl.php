@@ -10,21 +10,19 @@
 <input type="hidden" value="init" name="a">
 <input type="hidden" value="<?php echo $_GET['menuid']?>" name="menuid">
 <div class="explain-col search-form">
-<?php echo get_smsnotice();?>
+短信模块默认使用<a href="http://www.smsbao.com" target="_blank" style="font-weight:bold;color:red;">短信宝</a>接口，
+还没有短信宝账户，请点击<a href="http://smsbao.com/reg" target="_blank" style="font-weight:bold;color:red;">免费注册</a>，
+短信宝客服热线：400-716-3021，或联系短信宝<a href="http://wpa.b.qq.com/cgi/wpa.php?ln=1&key=XzkzODA0NjAyMV8yNTU0MzFfNDAwMDA5MDQ2NV8yXw" target="_blank" style="font-weight:bold;color:red;">在线客服</a>
+</br>
+说明：欲购买1W条以上的短信套餐以及包月套餐用户，请咨询<a href="http://wpa.b.qq.com/cgi/wpa.php?ln=1&key=XzkzODA0NjAyMV8yNTU0MzFfNDAwMDA5MDQ2NV8yXw" target="_blank" style="font-weight:bold;color:red;">在线客服</a>
+</br>
+备注：短信宝官网（http://www.smsbao.com），短信宝技术交流群：188145230
 </div>
 </form>
 <div class="btn text-l">
-<?php if(!empty($this->smsapi->userid)) {?>
-<span class="font-fixh green"><?php echo L('account')?></span> ： <span class="font-fixh"><?php echo $this->smsapi->userid?></span> ， <span class="font-fixh green"><?php echo L('smsnumber')?></span> ： </span><span class="font-fixh"><?php echo $smsinfo_arr['surplus']?></span> <span class="font-fixh green"><?php echo L('item')?></span>
-
-<?php } else {?>
-<span class="font-fixh green">未绑定平台账户，请点击<a href="index.php?m=sms&c=sms&a=sms_setting&menuid=1539&pc_hash=<?php echo $_GET['pc_hash'];?>"><span class="font-fixh">平台设置</span></a>绑定。</span>
-<?php }?>
+<span class="font-fixh green">您当前账户为：<?php echo $this->smsapi->userid?>，短信宝账户剩余短信条数：<?php echo $smsinfo_arr?></span>
 </div><br>
 
-<div class="btn text-l">
-<span class="font-fixh green">当前服务器IP为 ： <span class="font-fixh"><?php echo $_SERVER["SERVER_ADDR"];?></span> <?php if(!empty($smsinfo_arr['allow_send_ip']) &&!in_array($_SERVER["SERVER_ADDR"],$smsinfo_arr['allow_send_ip'])) echo '当前服务器所在IP不允许发送短信';?>
-</div>
 <br>
     <table width="100%" cellspacing="0">
         <thead>
@@ -39,19 +37,51 @@
             </tr>
         </thead>
     <tbody>
-
-<?php if(is_array($smsprice_arr)) foreach($smsprice_arr as $k=>$v) {?>
 	<tr>
-	<td width="10%" align="center"><?php echo $v['productid']?></td>
-
-	<td width="10%" align="left"><?php echo $v['name']?></td>
-	<td width="10%" align="left"><?php echo $v['description']?></td>
-	<td width="10%" align="left"><?php echo $v['totalnum']?></td>
-	<td width="10%" align="left"><?php echo $v['give_away']?></td>
-	<td width="10%" align="left"><?php echo $v['price']?></td>
-	<td width="10%" align="left"><a href="<?php echo $this->smsapi->get_buyurl($v['productid']);?>" target="_blank"><?php echo L('buy')?></a></td>
+		<td width="10%" align="center">1</td>
+		<td width="10%" align="left">50条短信</td>
+		<td width="10%" align="left">50条短信</td>
+		<td width="10%" align="left">50</td>
+		<td width="10%" align="left">0</td>
+		<td width="10%" align="left">5</td>
+		<td width="10%" align="left"><a href="http://smsbao.com/member/product/list.jhtml" target="_blank">购买</a></td>
 	</tr>
-<?php }?>
+	<tr>
+		<td width="10%" align="center">2</td>
+		<td width="10%" align="left">500条短信</td>
+		<td width="10%" align="left">500条短信</td>
+		<td width="10%" align="left">500</td>
+		<td width="10%" align="left">0</td>
+		<td width="10%" align="left">40</td>
+		<td width="10%" align="left"><a href="http://smsbao.com/member/product/list.jhtml" target="_blank">购买</a></td>
+	</tr>
+	<tr>
+		<td width="10%" align="center">3</td>
+		<td width="10%" align="left">2000条短信</td>
+		<td width="10%" align="left">2000条短信</td>
+		<td width="10%" align="left">2000</td>
+		<td width="10%" align="left">0</td>
+		<td width="10%" align="left">150</td>
+		<td width="10%" align="left"><a href="http://smsbao.com/member/product/list.jhtml" target="_blank">购买</a></td>
+	</tr>
+	<tr>
+		<td width="10%" align="center">4</td>
+		<td width="10%" align="left">5000条短信</td>
+		<td width="10%" align="left">5000条短信</td>
+		<td width="10%" align="left">5000</td>
+		<td width="10%" align="left">0</td>
+		<td width="10%" align="left">375</td>
+		<td width="10%" align="left"><a href="http://smsbao.com/member/product/list.jhtml" target="_blank">购买</a></td>
+	</tr>
+	<tr>
+		<td width="10%" align="center">5</td>
+		<td width="10%" align="left">10000条短信</td>
+		<td width="10%" align="left">10000条短信</td>
+		<td width="10%" align="left">10000</td>
+		<td width="10%" align="left">0</td>
+		<td width="10%" align="left">700</td>
+		<td width="10%" align="left"><a href="http://smsbao.com/member/product/list.jhtml" target="_blank">购买</a></td>
+	</tr>
     </tbody>
     </table>
 <div class="explain-col search-form">

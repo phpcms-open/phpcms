@@ -9,7 +9,7 @@ $session_storage = 'session_'.pc_base::load_config('system','session_storage');
 pc_base::load_sys_class($session_storage);
 
 if(empty($_SESSION['code'])) exit('-100');
-if(empty($_GET['session_code']) || preg_match('/^([a-z0-9])$/i',$_GET['session_code']) || $_SESSION['code']!=$_GET['session_code']) exit('-101');
+if(empty($_GET['session_code']) || preg_match('/^([a-zA-Z0-9])$/i',$_GET['session_code']) || $_SESSION['code']!=$_GET['session_code']) exit('-101');
 
 if(isset($_GET['mobile']) && !empty($_GET['mobile'])) {
 	$mobile = $_GET['mobile'];
@@ -26,7 +26,7 @@ $_SESSION['csms'] += 1;
 
 $siteid = get_siteid() ? get_siteid() : 1 ;
 $sms_setting = getcache('sms','sms');
-if(!preg_match('/^(?:13\d{9}|15[0|1|2|3|5|6|7|8|9]\d{8}|18[0|2|3|5|6|7|8|9]\d{8}|14[5|7]\d{8})$/',$mobile)) exit('mobile phone error');
+if(!preg_match('/^1[3-9]\d{9}$/',$mobile)) exit('mobile phone error');
 $posttime = SYS_TIME-86400;
 $where = "`mobile`='$mobile' AND `posttime`>'$posttime'";
 $num = $sms_report_db->count($where);
@@ -67,6 +67,9 @@ $smsapi = new smsapi($sms_uid, $sms_pid, $sms_passwd); //初始化接口类
 $mobile = explode(',',$mobile);
 
 $tplid = 1;
+$id_code = random(6);//唯一吗，用于扩展验证
+$send_txt = '尊敬的用户您好，您的注册验证码为：'.$id_code.'，验证码有效期为5分钟。'; 
+$content = safe_replace($send_txt);
 $sent_time = intval($_POST['sendtype']) == 2 && !empty($_POST['sendtime'])  ? trim($_POST['sendtime']) : date('Y-m-d H:i:s',SYS_TIME);
 $smsapi->send_sms($mobile, $send_txt, $sent_time, CHARSET,$id_code,$tplid); //发送短信
 echo 0;

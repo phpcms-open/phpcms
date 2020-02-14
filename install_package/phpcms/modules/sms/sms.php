@@ -20,7 +20,6 @@ class sms extends admin {
 		} else {
 			$this->sms_setting = array('userid'=>'', 'productid'=>'', 'sms_key'=>'');
 		}
-		
 		//初始化smsapi
 		pc_base::load_app_class('smsapi', '', 0);
 		$this->smsapi = new smsapi($this->sms_setting['userid'], $this->sms_setting['productid'], $this->sms_setting['sms_key']);
@@ -113,7 +112,7 @@ class sms extends admin {
 
 		if(isset($_POST['dosubmit'])) {
 			//组合短信参数内容
-			$content = '';
+			/*$content = '';
 			if(is_array($_POST['msg']) && !empty($_POST['msg'])){
 				foreach ($_POST['msg'] as $val) { 
 					$val = stripcslashes($val);
@@ -123,7 +122,8 @@ class sms extends admin {
 						$content.="||$val";
 					}
 				}
-			}
+			}*/
+			$content=trim(stripcslashes($_POST['msg']));
 			$mobile = explode("\r\n", trim($_POST['mobile'],"\r\n"));
 			$mobile = array_unique($mobile);
 			$tplid = intval($_POST['tplid']);
@@ -135,19 +135,18 @@ class sms extends admin {
 			}
 			
 			//短信余额不足
-			if($smsinfo['surplus'] < count($mobile)) {
+			if($smsinfo< count($mobile)) {
 				showmessage(L('need_more_surplus'));
 			}
 			
 			//发送短信
 			$return = $this->smsapi->send_sms($mobile, $content, $_POST['sendtime'], CHARSET,'',$tplid);
-			
 			showmessage($return, HTTP_REFERER,6000);
 		} else {
-			$smsinfo_arr = $this->smsapi->get_smsinfo();
-			if(!empty($smsinfo_arr['allow_send_ip']) &&!in_array($_SERVER["SERVER_ADDR"],$smsinfo_arr['allow_send_ip'])) {
-				showmessage(L('this_server_does_not_allow_send_sms'));
-			}
+			//$smsinfo_arr = $this->smsapi->get_smsinfo();
+			//if(!empty($smsinfo_arr['allow_send_ip']) &&!in_array($_SERVER["SERVER_ADDR"],$smsinfo_arr['allow_send_ip'])) {
+			//	showmessage(L('this_server_does_not_allow_send_sms'));
+			//}
 			$start_time = date('Y-m-d', SYS_TIME-date('t', SYS_TIME)*86400);
 			$end_time = date('Y-m-d', SYS_TIME);
 			$grouplist = getcache('grouplist', 'member');

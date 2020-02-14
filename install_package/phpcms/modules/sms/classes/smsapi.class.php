@@ -16,7 +16,7 @@ class smsapi {
 	 * @param string $sms_key 密钥
 	 */
 	public function __construct($userid = '', $productid = '', $sms_key = '') {
-		$this->smsapi_url = 'http://sms.phpip.com/api.php?';
+		$this->smsapi_url = 'http://api.smsbao.com/sms?';
 		$this->userid = $userid;
 		$this->productid = $productid;
 		$this->sms_key = $sms_key;
@@ -38,18 +38,22 @@ class smsapi {
 	 * 获取短信产品购买地址
 	 */
 	public function get_buyurl($productid = 0) {
-		return 'http://sms.phpip.com/index.php?m=sms_service&c=center&a=buy&sms_pid='.$this->productid.'&productid='.$productid;
+		//return 'http://sms.phpip.com/index.php?m=sms_service&c=center&a=buy&sms_pid='.$this->productid.'&productid='.$productid;
+		return 'http://smsbao.com/member/product/list.jhtml';
 	}
 	public function show_qf_url() {
-		return $this->smsapi_url.'op=sms_qf_url&sms_uid='.$this->userid.'&sms_pid='.$this->productid.'&sms_key='.$this->sms_key;
+		return $this->smsapi_url.'u='.$this->userid.'&p='.md5($this->sms_key).'&m={mobile}&c=【'.$this->productid.'】{content}';
 	}
 	/**
 	 * 获取短信剩余条数和限制短信发送ip
 	 */
 	public function get_smsinfo() {
-		$this->param = array('op'=>'sms_get_info');
-		$res = $this->pc_file_get_contents();
-		return !empty($res) ? json_decode($res, 1) : array();	
+		$post='u='.$this->userid.'&p='.md5($this->sms_key);
+        $ret = file_get_contents('http://api.smsbao.com/query?'.$post);
+		$retArr = split("\n", $ret);
+        $balanceArr = split(",", $retArr[1]);
+        $balance = $retArr[0] == 0 ? $balanceArr[1] : $ret;
+        return $balance;	
 	}	
 
 	/**
@@ -92,59 +96,52 @@ class smsapi {
 	public function send_sms($mobile='', $content='', $send_time='', $charset='gbk',$id_code = '',$tplid = '',$return_code = 0) {
 		//短信发送状态
 		$status = $this->_sms_status();
-		if(is_array($mobile)){
-			$mobile = implode(",", $mobile);
-		}
 		$content = safe_replace($content);
-		if(strtolower($charset)=='utf-8') {
-			$send_content = iconv('utf-8','gbk',$content);//官网IS GBK
-		}else{
-			$send_content = $content;
-		}
+		$send_content = $content;
 		$send_time = strtotime($send_time);
-	
-		$data = array(
-						'sms_pid' => $this->productid,
-						'sms_passwd' => $this->sms_key,
-						'sms_uid' => $this->userid,
-						'charset' => CHARSET,
-						'send_txt' => urlencode($send_content),
-						'mobile' => $mobile,
-						'send_time' => $send_time,
-						'tplid' => $tplid,
-					);
-		$post = '';
-		foreach($data as $k=>$v) {
-			$post .= $k.'='.$v.'&';
-		}
 
 		$smsapi_senturl = $this->smsapi_url.'op=sms_service_new';
-		$return = $this->_post($smsapi_senturl, 0, $post);
-		$arr = explode('#',$return);
-		$this->statuscode = $arr[0];
-		//增加到本地数据库
-		$sms_report_db = pc_base::load_model('sms_report_model');
-		$send_userid = param::get_cookie('_userid') ? intval(param::get_cookie('_userid')) : 0;
-		$ip = ip();
-		
-		$new_content = $content;
-		if(isset($this->statuscode)) {
- 			$sms_report_db->insert(array('mobile'=>$mobile,'posttime'=>SYS_TIME,'id_code'=>$id_code,'send_userid'=>$send_userid,'status'=>$this->statuscode,'msg'=>$new_content,'return_id'=>$return,'ip'=>$ip));
-		} else {
-		$sms_report_db->insert(array('mobile'=>$mobile,'posttime'=>SYS_TIME,'send_userid'=>$send_userid,'status'=>'-2','msg'=>$new_content,'ip'=>$ip));
-		}
-		if($this->statuscode==0) {
-			$barr = explode(':',$arr[1]);
-			if($barr[0]=='KEY') {
-				return '短信已提交，请等待审批！审批时间为：9:00-18:00。 法定假日不审批！如需帮助，请联系phpcms.cn官网！';
+		foreach($mobile as $key=>$val){
+			$data = array(
+					'p' => md5($this->sms_key),
+					'u' => $this->userid,
+					'charset' => CHARSET,
+					'c' => urlencode('【'.$this->productid.'】'.$send_content),
+					'm' => $val,
+					'send_time' => $send_time,
+					'tplid' => $tplid,
+				);
+			$post = '';
+			foreach($data as $k=>$v) {
+				$post .= $k.'='.$v.'&';
 			}
+			$return = $this->_post($smsapi_senturl, 0, $post);
+			//增加到本地数据库
+			$sms_report_db = pc_base::load_model('sms_report_model');
+			$send_userid = param::get_cookie('_userid') ? intval(param::get_cookie('_userid')) : 0;
+			$ip = ip();
+			
+			$new_content = $content;
+			if($return=='0') {
+				$sms_report_db->insert(array('mobile'=>$val,'posttime'=>SYS_TIME,'id_code'=>$id_code,'send_userid'=>$send_userid,'status'=>$this->statuscode,'msg'=>$new_content,'return_id'=>$return,'ip'=>$ip));
+			} else {
+				$sms_report_db->insert(array('mobile'=>$val,'posttime'=>SYS_TIME,'send_userid'=>$send_userid,'status'=>'-2','msg'=>$new_content,'ip'=>$ip));
+			}
+			if($this->statuscode==0) {
+				$barr = explode(':',$arr[1]);
+				if($barr[0]=='KEY') {
+					return '短信已提交，请等待审批！审批时间为：9:00-18:00。 法定假日不审批！如需帮助，请联系phpcms.cn官网！';
+				}
+			}
+			//end
 		}
-		//end
-		if($return_code) {
-			return $arr[0];
-		} else {
-			return isset($status[$arr[0]]) ? $status[$arr[0]] : $arr[0];
-		}
+		//$arr = explode('#',$return);
+		//$this->statuscode = $arr[0];
+		//if($return_code) {
+		//	return $arr[0];
+		//} else {
+		//	return isset($status[$arr[0]]) ? $status[$arr[0]] : $arr[0];
+		//}
 	}
 		
 	/**
@@ -155,9 +152,8 @@ class smsapi {
 	public function pc_file_get_contents($timeout=30) {
 		
 		$this->setting = array(
-							'sms_uid'=>$this->userid,
-							'sms_pid'=>$this->productid,
-							'sms_passwd'=>$this->sms_key,	
+							'u'=>$this->userid,
+							'p'=>md5($this->sms_key),	
 							);
 									
 		$this->param = array_merge($this->param, $this->setting);

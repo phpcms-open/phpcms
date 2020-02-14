@@ -2,6 +2,9 @@
 	defined('IN_ADMIN') or exit('No permission resources.');
 	include $this->admin_tpl('header', 'admin');
 ?>
+<div class="explain-col search-form">
+	请<a href="http://smsbao.com/login" target="_blank" style="font-weight:bold;color:red;">登录短信宝后台</a>查看
+</div>
 <form name="myform" action="?m=admin&c=position&a=listorder" method="post">
 <div class="pad_10">
 <div class="table-list">
