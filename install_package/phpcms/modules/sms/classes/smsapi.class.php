@@ -50,8 +50,8 @@ class smsapi {
 	public function get_smsinfo() {
 		$post='u='.$this->userid.'&p='.md5($this->sms_key);
         $ret = file_get_contents('http://api.smsbao.com/query?'.$post);
-		$retArr = split("\n", $ret);
-        $balanceArr = split(",", $retArr[1]);
+		$retArr = explode("\n", $ret);
+        $balanceArr = explode(",", $retArr[1]);
         $balance = $retArr[0] == 0 ? $balanceArr[1] : $ret;
         return $balance;	
 	}	
